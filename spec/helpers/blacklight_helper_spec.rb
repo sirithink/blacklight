@@ -306,6 +306,7 @@ describe BlacklightHelper do
      it "should render the document_list" do
        @document_list = ['a', 'b']
        self.stub!(:document_index_view_type) { "gallery" }
+       lookup_context.should_receive(:find_all).with('/_document_gallery').and_return(['/_document_gallery'])
        self.should_receive(:render).with(hash_including(:partial => 'document_gallery'))
        render_document_index
      end
@@ -314,9 +315,6 @@ describe BlacklightHelper do
        @document_list = ['a', 'b']
        self.stub!(:document_index_view_type) { "gallery" }
 
-       ex = ActionView::MissingTemplate.new [], '', '', '',''
-       self.should_receive(:render).with(hash_including(:partial => 'document_gallery')).and_raise(ex)
-       self.should_receive(:render).with(hash_including(:partial => 'catalog/document_gallery')).and_raise(ex)
        self.should_receive(:render).with(hash_including(:partial => 'catalog/document_list'))
        render_document_index
      end

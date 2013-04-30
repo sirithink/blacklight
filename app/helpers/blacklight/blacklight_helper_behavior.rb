@@ -366,16 +366,13 @@ module Blacklight::BlacklightHelperBehavior
     documents ||= @document_list
 
     document_index_path_templates.each do |str|
-      # XXX rather than handling this logic through exceptions, maybe there's a Rails internals method
-      # for determining if a partial template exists..
-      begin
-        return render(:partial => (str % { :index_view_type => document_index_view_type }), :locals => { :documents => documents })
-      rescue ActionView::MissingTemplate
-        nil
+      str = (str % { :index_view_type => document_index_view_type })
+      parts = str.split('/')
+      ## Look for the partial. If str is `one/two/three/four' then look for a partial at `one/two/three/_four'
+      if lookup_context.find_all(parts[0..-2].join('/') + '/_' + parts[-1]).any?
+        return render(:partial => str, :locals => { :documents => documents })
       end
     end
-
-    return ""
   end
 
   # a list of document partial templates to try to render for #render_document_index
@@ -407,16 +404,13 @@ module Blacklight::BlacklightHelperBehavior
     format = document_partial_name(doc)
 
     document_partial_path_templates.each do |str|
-      # XXX rather than handling this logic through exceptions, maybe there's a Rails internals method
-      # for determining if a partial template exists..
-      begin
-        return render :partial => (str % { :action_name => action_name, :format => format, :index_view_type => document_index_view_type }), :locals=>locals.merge({:document=>doc})
-      rescue ActionView::MissingTemplate
-        nil
+      str = (str % { :action_name => action_name, :format => format, :index_view_type => document_index_view_type })
+      parts = str.split('/')
+      ## Look for the partial. If str is `one/two/three/four' then look for a partial at `one/two/three/_four'
+      if lookup_context.find_all(parts[0..-2].join('/') + '/_' + parts[-1]).any?
+        return render :partial => str, :locals=>locals.merge({:document=>doc})
       end
     end
-
-    return ''
   end
 
   # a list of document partial templates to try to render for #render_document_partial
